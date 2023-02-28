@@ -1,5 +1,6 @@
 import AtmPy
 from AtmPy import cape_3D_plevs
+from AtmPy import cape_4D_plevs
 import numpy as np
 import os
 
@@ -71,10 +72,10 @@ def cape_plev_4D(prs_mb,tmp,mixr,hgt,ter,psfc_mb,sfc_t,sfc_mixr,ter_follow=0,par
     '''
     input
     -----
-    prs_mb:3D array (time,plev,lat,lon) of pressure on vertical levels (mb)
-    tmp: 3D array (time,plev,lat,lon) of temperature on vertical levels (K)
+    prs_mb:4D array (time,plev,lat,lon) of pressure on vertical levels (mb)
+    tmp: 4D array (time,plev,lat,lon) of temperature on vertical levels (K)
     mixr: 3D array (time,plev,lat,lon) of water vapor mixing ratio on vertical levels (kg/kg)
-    hgt: 3D array (time,plev,lat,lon) of geopotential height on vertical levels (m)
+    hgt: 4D array (time,plev,lat,lon) of geopotential height on vertical levels (m)
     ter: 2D array (lat,lon) terrain height/orog (m)
     psfc_mb: 3D array (time,lat,lon) surface pressure (mb)
     sfc_t: 3D array (time,lat,lon) near-surface (e.g. 2m ) temperature (K)
