@@ -8,7 +8,7 @@ __all__ = ['mlcape_plev','mlcape3km_plev','mlcape3km_plev_4D','sfcape_plev','sfc
 lookup_file = os.path.abspath(AtmPy.__file__) + 'psadilookup.dat'
 
 
-def mucape_plev(prs_mb,tmp,mixr,hgt,ter,psfc_mb,sfc_t,sfc_mixr,lookup_file=lookup_file):
+def mucape_plev_3D(prs_mb,tmp,mixr,hgt,ter,psfc_mb,sfc_t,sfc_mixr,lookup_file=lookup_file):
     '''
     input
     -----
@@ -32,7 +32,7 @@ def mucape_plev(prs_mb,tmp,mixr,hgt,ter,psfc_mb,sfc_t,sfc_mixr,lookup_file=looku
     mulfc: 2D array of 0-3km most unstable parcel lfc height (m)
     '''
     ter_follow = 0 #pressure level data
-    cape_type = 0
+    cape_type = 0 #mu parcel
     #test to make sure vertical pressure is top down
     plevtest = prs_mb[:,0,0]
     sortedplev = np.sort(plevtest)
@@ -42,7 +42,7 @@ def mucape_plev(prs_mb,tmp,mixr,hgt,ter,psfc_mb,sfc_t,sfc_mixr,lookup_file=looku
         mixr = mixr[::-1,:,:]
         hgt = hgt[::-1,:,:]
 
-    mucape,mucin,mulcl,mulfc,muel,mupght,mulclt,muelt = capecalc_plev.dcapecalc3d(prs_mb,tmp,mixr,hgt,ter,psfc_mb,sfc_t,sfc_mixr,cape_type,ter_follow,lookup_file)
+    mucape,mucin,mulcl,mulfc,muel,mupght,mulclt,muelt = AtmPy.cape_3D_plevs.dcapecalc3d(prs_mb,tmp,mixr,hgt,ter,psfc_mb,sfc_t,sfc_mixr,cape_type,ter_follow,lookup_file)
     return mucape,mucin,mulcl,mulfc,muel,mupght,mulclt,muelt
 
 
