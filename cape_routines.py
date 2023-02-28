@@ -90,7 +90,18 @@ def cape_plev_4D(prs_mb,tmp,mixr,hgt,ter,psfc_mb,sfc_t,sfc_mixr,parcel):
     mulfc: 3D array of 0-3km most unstable parcel lfc height (m)
     '''
     ter_follow = 0 #pressure level data
-    cape_type = 0
+    if parcel == 'SB': # Surface based parcel
+        cape_type = 1
+    elif parcel == 'MU':# Most Unstable Parcel
+        cape_type = 0 
+    elif parcel == 'ML': # 100mb MLCAPE
+        cape_type = 3
+    elif parcel == 'UL': # MUCAPE in the 0 to -20C layer
+        cape_type = 6
+    elif parcel == 'SB3km': # SBCAPE in lowest 3km 
+        cape_type = 4
+    elif parcel == 'ML3km': # 100mb MLCAPE in lowest 3km 
+        cape_type = 5
     #test to make sure vertical pressure is top down
     plevtest = prs_mb[0,:,0,0]
     sortedplev = np.sort(plevtest)
