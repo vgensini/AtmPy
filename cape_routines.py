@@ -88,7 +88,7 @@ def mucape_0to20_plev_3D(prs_mb,tmp,mixr,hgt,ter,psfc_mb,sfc_t,sfc_mixr,lookup_f
 
     mucape,mucin,mulcl,mulfc,muel,mupght,mulclt,muelt = cape_3D_plevs.dcapecalc3d(prs_mb,tmp,mixr,hgt,ter,psfc_mb,sfc_t,sfc_mixr,cape_type,ter_follow,lookup_file)
 
-    return mucape,mucin,mulcl,mulfc,muel,mupght
+    return mucape,mucin,mulcl,mulfc,muel,mupght,mulclt,muelt
 
 
 def mucape_plev_4D(prs_mb,tmp,mixr,hgt,ter,psfc_mb,sfc_t,sfc_mixr,lookup_file=lookup_file):
