@@ -1,5 +1,5 @@
 import AtmPy
-from AtmPy import *
+from AtmPy import cape_3D_plevs
 import numpy as np
 import os
 
