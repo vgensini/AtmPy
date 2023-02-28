@@ -8,9 +8,9 @@ __all__ = ['cape_plev_3D','cape_plev_4D']
 
 
 lookup_file = AtmPy.__path__.__dict__["_path"][0] + '/psadilookup.dat'
+ter_follow = 0 # Pressure level data for all functions
 
-
-def cape_plev_3D(prs_mb,tmp,mixr,hgt,ter,psfc_mb,sfc_t,sfc_mixr,ter_follow=0,parcel):
+def cape_plev_3D(prs_mb,tmp,mixr,hgt,ter,psfc_mb,sfc_t,sfc_mixr,parcel):
     '''
     Calculate CAPE on Pressure Levels
 
@@ -24,7 +24,6 @@ def cape_plev_3D(prs_mb,tmp,mixr,hgt,ter,psfc_mb,sfc_t,sfc_mixr,ter_follow=0,par
     psfc_mb: 2D array (lat,lon) surface pressure (mb)
     sfc_t: near-surface (e.g. 2m ) temperature (K)
     sfc_mixr: near-surface (e.g. 2m ) mixing ratio (kg/kg) 
-    ter_follow: scalar; 0: pressure level data, 1: terrain following data
     parcel: string; MU, ML, SB, UL, ML3km, SB3km, : Most unstable, 100mb mixed-layer, surfaced based, most unstable in 0 to -20C layer
 
     ** order needs to be top down for vertical dimension **
@@ -68,7 +67,7 @@ def cape_plev_3D(prs_mb,tmp,mixr,hgt,ter,psfc_mb,sfc_t,sfc_mixr,ter_follow=0,par
     cape,cin,lcl,lfc,el,pght,lclt,elt = cape_3D_plevs.dcapecalc3d(prs_mb,tmp,mixr,hgt,ter,psfc_mb,sfc_t,sfc_mixr,cape_type,ter_follow,lookup_file)
     return cape,cin,lcl,lfc,el,pght,lclt,elt
 
-def cape_plev_4D(prs_mb,tmp,mixr,hgt,ter,psfc_mb,sfc_t,sfc_mixr,ter_follow=0,parcel):
+def cape_plev_4D(prs_mb,tmp,mixr,hgt,ter,psfc_mb,sfc_t,sfc_mixr,parcel):
     '''
     input
     -----
@@ -80,7 +79,6 @@ def cape_plev_4D(prs_mb,tmp,mixr,hgt,ter,psfc_mb,sfc_t,sfc_mixr,ter_follow=0,par
     psfc_mb: 3D array (time,lat,lon) surface pressure (mb)
     sfc_t: 3D array (time,lat,lon) near-surface (e.g. 2m ) temperature (K)
     sfc_mixr: 3D array (time,lat,lon) near-surface (e.g. 2m ) mixing ratio (kg/kg) 
-    ter_follow: scalar; 0: pressure level data, 1: terrain following data
 
     ** order needs to be top down for vertical dimension **
 
