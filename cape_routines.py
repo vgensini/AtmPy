@@ -38,6 +38,7 @@ def mucape_plev_3D(prs_mb,tmp,mixr,hgt,ter,psfc_mb,sfc_t,sfc_mixr,lookup_file=lo
     plevtest = prs_mb[:,0,0]
     sortedplev = np.sort(plevtest)
     if np.array_equal(plevtest,sortedplev) == False:
+        print('Warning, your data are not sorted by pressure increasing (top down). Inverting...')
         prs_mb = prs_mb[::-1,:,:]
         tmp = tmp[::-1,:,:]
         mixr = mixr[::-1,:,:]
