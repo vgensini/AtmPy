@@ -1,13 +1,11 @@
-#import AtmPy.cape_plev as capecalc_plev
-import AtmPy.mod_rip_cape_plev_4D as capecalc_plev_4D
-#import AtmPy.dcape as dcapecalc_plev
-#import AtmPy.dcape_plev_4D as dcapecalc_plev_4D
+import AtmPy
 import numpy as np
 import os
 
 __all__ = ['mlcape_plev','mlcape3km_plev','mlcape3km_plev_4D','sfcape_plev','sfcape3km_plev','sfcape3km_plev_4D','mucape_plev','mucape_plev_4D','mlcape_plev','mlcape_plev_4D','sfcape_plev_4D','dcape_plev','dcape_plev_4D']
 
-lookup_file = '/home/data/gefs_reforecasts/psadilookup.dat'
+
+lookup_file = os.path.abspath(AtmPy.__file__) + 'psadilookup.dat'
 
 
 def mucape_plev(prs_mb,tmp,mixr,hgt,ter,psfc_mb,sfc_t,sfc_mixr,lookup_file=lookup_file):
