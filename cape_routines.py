@@ -9,8 +9,10 @@ __all__ = ['mucape_plev_3D','mucape_0to20_plev_3D']
 lookup_file = AtmPy.__path__.__dict__["_path"][0] + '/psadilookup.dat'
 
 
-def mucape_plev_3D(prs_mb,tmp,mixr,hgt,ter,psfc_mb,sfc_t,sfc_mixr,lookup_file=lookup_file):
+def cape_plev_3D(prs_mb,tmp,mixr,hgt,ter,psfc_mb,sfc_t,sfc_mixr,parcel):
     '''
+    Calculate CAPE on Pressure Levels
+
     input
     -----
     prs_mb:3D array (vlev,lat,lon) of pressure on vertical levels (mb)
@@ -37,7 +39,15 @@ def mucape_plev_3D(prs_mb,tmp,mixr,hgt,ter,psfc_mb,sfc_t,sfc_mixr,lookup_file=lo
     muelt: 2D array of most unstable parcel equillibrium temperature (K)
     '''
     ter_follow = 0 #pressure level data
-    cape_type = 0 #mu parcel
+    if parcel == 'SB': # Surface based parcel
+        cape_type = 1
+    elif parcel == 'MU':
+        cape_type = 0 # Most Unstable Parcel
+    elif parcel == 'ML':
+        cape_type = 3
+    elif parcel == 'UL': # MUCAPE in the 0 to -20C layer
+        cape_type = 6
+
     #test to make sure vertical pressure is top down
     plevtest = prs_mb[:,0,0]
     sortedplev = np.sort(plevtest)
@@ -48,48 +58,8 @@ def mucape_plev_3D(prs_mb,tmp,mixr,hgt,ter,psfc_mb,sfc_t,sfc_mixr,lookup_file=lo
         mixr = mixr[::-1,:,:]
         hgt = hgt[::-1,:,:]
 
-    mucape,mucin,mulcl,mulfc,muel,mupght,mulclt,muelt = cape_3D_plevs.dcapecalc3d(prs_mb,tmp,mixr,hgt,ter,psfc_mb,sfc_t,sfc_mixr,cape_type,ter_follow,lookup_file)
-    return mucape,mucin,mulcl,mulfc,muel,mupght,mulclt,muelt
-
-
-def mucape_0to20_plev_3D(prs_mb,tmp,mixr,hgt,ter,psfc_mb,sfc_t,sfc_mixr,lookup_file=lookup_file):
-    '''
-    input
-    -----
-    prs_mb:3D array (vlev,lat,lon) of pressure on vertical levels (mb)
-    tmp: 3D array (vlev,lat,lon) of temperature on vertical levels (K)
-    mixr: 3D array (vlev,lat,lon) of water vapor mixing ratio on vertical levels (kg/kg)
-    hgt: 3D array (vlev,lat,lon) of geopotential height on vertical levels (m)
-    ter: 2D array (lat,lon) terrain height/orog (m)
-    psfc_mb: 2D array (lat,lon) surface pressure (mb)
-    sfc_t: near-surface (e.g. 2m ) temperature (K)
-    sfc_mixr: near-surface (e.g. 2m ) mixing ratio (kg/kg) 
-    ter_follow: scalar; 0: pressure level data, 1: terrain following data
-
-    ** order needs to be top down for vertical dimension **
-
-    output
-    ------
-    mucape: 2D array of 0-3km most unstable parcel cape (J/kg)
-    mucin: 2D array of 0-3km most unstable parcel cin (J/kg)
-    mulcl: 2D array of 0-3km most unstable parcel lcl height (m)
-    mulfc: 2D array of 0-3km most unstable parcel lfc height (m)
-    '''
-    ter_follow = 0 #pressure level data
-    cape_type = 6 #0tominus20C
-    #test to make sure vertical pressure is top down
-    plevtest = prs_mb[:,0,0]
-    sortedplev = np.sort(plevtest)
-    if np.array_equal(plevtest,sortedplev) == False:
-        prs_mb = prs_mb[::-1,:,:]
-        tmp = tmp[::-1,:,:]
-        mixr = mixr[::-1,:,:]
-        hgt = hgt[::-1,:,:]
-
-    mucape,mucin,mulcl,mulfc,muel,mupght,mulclt,muelt = cape_3D_plevs.dcapecalc3d(prs_mb,tmp,mixr,hgt,ter,psfc_mb,sfc_t,sfc_mixr,cape_type,ter_follow,lookup_file)
-
-    return mucape,mucin,mulcl,mulfc,muel,mupght,mulclt,muelt
-
+    cape,cin,lcl,lfc,el,pght,lclt,elt = cape_3D_plevs.dcapecalc3d(prs_mb,tmp,mixr,hgt,ter,psfc_mb,sfc_t,sfc_mixr,cape_type,ter_follow,lookup_file)
+    return cape,cin,lcl,lfc,el,pght,lclt,elt
 
 def mucape_plev_4D(prs_mb,tmp,mixr,hgt,ter,psfc_mb,sfc_t,sfc_mixr,lookup_file=lookup_file):
     '''
@@ -131,12 +101,6 @@ def mucape_plev_4D(prs_mb,tmp,mixr,hgt,ter,psfc_mb,sfc_t,sfc_mixr,lookup_file=lo
 
     mucape,mucin,mulcl,mulfc,muel,mupght,mulclt,muelt = capecalc_plev_4D.dcapecalc3d(prs_mb,tmp,mixr,hgt,ter,psfc_mb,sfc_t,sfc_mixr,cape_type,ter_follow,lookup_file)
     return mucape,mucin,mulcl,mulfc,muel,mupght,mulclt,muelt
-
-
-
-
-
-
 
 def mucape_0to20_plev_4D(prs_mb,tmp,mixr,hgt,ter,psfc_mb,sfc_t,sfc_mixr,lookup_file=lookup_file):
     '''
@@ -181,44 +145,6 @@ def mucape_0to20_plev_4D(prs_mb,tmp,mixr,hgt,ter,psfc_mb,sfc_t,sfc_mixr,lookup_f
 
     return mucape,mucin,mulcl,mulfc,muel,mupght
 
-
-
-def mlcape_plev(prs_mb,tmp,mixr,hgt,ter,psfc_mb,sfc_t,sfc_mixr,cape_type=3,lookup_file=lookup_file):
-    '''
-    input
-    -----
-    prs_mb:3D array (vlev,lat,lon) of pressure on vertical levels (mb)
-    tmp: 3D array (vlev,lat,lon) of temperature on vertical levels (K)
-    mixr: 3D array (vlev,lat,lon) of water vapor mixing ratio on vertical levels (kg/kg)
-    hgt: 3D array (vlev,lat,lon) of geopotential height on vertical levels (m)
-    ter: 2D array (lat,lon) terrain height/orog (m)
-    psfc_mb: 2D array (lat,lon) surface pressure (mb)
-    ter_follow: scalar; 0: pressure level data, 1: terrain following data
-
-    ** order needs to be top down for vertical dimension **
-
-    output
-    ------
-    *UPP version of MLCAPE (lifts from mixed-layer level)
-
-    mlcape: 2D array of 100mb mixed layer cape (J/kg)
-    mlcin: 2D array of 100mb mixed layer cin (J/kg)
-    mllcl: 2D array of 100mb mixed layer lcl height (m)
-    mllfc: 2D array of 100mb mixed layer lfc height (m)
-    '''
-    #test to make sure vertical pressure is top down
-    plevtest = prs_mb[:,0,0]
-    sortedplev = np.sort(plevtest)
-    if np.array_equal(plevtest,sortedplev) == False:
-        prs_mb = prs_mb[::-1,:,:]
-        tmp = tmp[::-1,:,:]
-        mixr = mixr[::-1,:,:]
-        hgt = hgt[::-1,:,:]
-    ter_follow = 0 #pressure level data
-    #cape_type = 3 #raise from sfc=3 ,raise from midlayer=2
-    mlcape,mlcin,mllcl,mllfc,mlel,mlpght,mllclt,mlelt = capecalc_plev.dcapecalc3d(prs_mb,tmp,mixr,hgt,ter,psfc_mb,sfc_t,sfc_mixr,cape_type,ter_follow,lookup_file)
-
-    return mlcape,mlcin,mllcl,mllfc,mlel,mlpght,mllclt,mlelt
 
 def mlcape_plev_4D(prs_mb,tmp,mixr,hgt,ter,psfc_mb,sfc_t,sfc_mixr,cape_type=3,lookup_file=lookup_file):
     '''
@@ -342,45 +268,6 @@ def mlcape3km_plev_4D(prs_mb,tmp,mixr,hgt,ter,psfc_mb,sfc_t,sfc_mixr,lookup_file
     cape_type = 5
     mlcape,mlcin,mllcl,mllfc,mlel,mlpght,mllclt,mlelt = capecalc_plev_4D.dcapecalc3d(prs_mb,tmp,mixr,hgt,ter,psfc_mb,sfc_t,sfc_mixr,cape_type,ter_follow,lookup_file)
     return mlcape,mlcin,mllcl,mllfc,mlel,mlpght
-
-
-
-def sfcape_plev(prs_mb,tmp,mixr,hgt,ter,psfc_mb,sfc_t,sfc_mixr,lookup_file=lookup_file):
-    '''
-    input
-    -----
-    prs_mb:3D array (vlev,lat,lon) of pressure on vertical levels (mb)
-    tmp: 3D array (vlev,lat,lon) of temperature on vertical levels (K)
-    mixr: 3D array (vlev,lat,lon) of water vapor mixing ratio on vertical levels (kg/kg)
-    hgt: 3D array (vlev,lat,lon) of geopotential height on vertical levels (m)
-    ter: 2D array (lat,lon) terrain height/orog (m)
-    psfc_mb: 2D array (lat,lon) surface pressure (mb)
-    sfc_t: near-surface (e.g. 2m ) temperature (K)
-    sfc_mixr: near-surface (e.g. 2m ) mixing ratio (kg/kg) 
-    ter_follow: scalar; 0: pressure level data, 1: terrain following data
-
-    ** order needs to be top down for vertical dimension **
-
-    output
-    ------
-    sfccape: 2D array of surface based cape (J/kg)
-    sfccin: 2D array of surface based cin (J/kg)
-    sfclcl: 2D array of surface based lcl height (m)
-    sfclfc: 2D array of surface based lfc height (m)
-    '''
-    ter_follow = 0 #pressure level data
-    cape_type = 1
-    #test to make sure vertical pressure is top down
-    plevtest = prs_mb[:,0,0]
-    sortedplev = np.sort(plevtest)
-    if np.array_equal(plevtest,sortedplev) == False:
-        prs_mb = prs_mb[::-1,:,:]
-        tmp = tmp[::-1,:,:]
-        mixr = mixr[::-1,:,:]
-        hgt = hgt[::-1,:,:]
-
-    sfccape,sfccin,sfclcl,sfclfc,sfcel,sfcpght,sfclclt,sfcelt = capecalc_plev.dcapecalc3d(prs_mb,tmp,mixr,hgt,ter,psfc_mb,sfc_t,sfc_mixr,cape_type,ter_follow,lookup_file)
-    return sfccape,sfccin,sfclcl,sfclfc,sfcel,sfcpght,sfclclt,sfcelt
 
 def sfcape_plev_4D(prs_mb,tmp,mixr,hgt,ter,psfc_mb,sfc_t,sfc_mixr,lookup_file=lookup_file):
     '''
