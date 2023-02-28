@@ -1,8 +1,8 @@
-import AtmPy
+from AtmPy import cape_3D_plevs
 import numpy as np
 import os
 
-__all__ = ['mlcape_plev','mlcape3km_plev','mlcape3km_plev_4D','sfcape_plev','sfcape3km_plev','sfcape3km_plev_4D','mucape_plev','mucape_plev_4D','mlcape_plev','mlcape_plev_4D','sfcape_plev_4D','dcape_plev','dcape_plev_4D']
+__all__ = ['mlcape_plev','mlcape3km_plev','mlcape3km_plev_4D','sfcape_plev','sfcape3km_plev','sfcape3km_plev_4D','mucape_plev_3D','mucape_plev_4D','mlcape_plev','mlcape_plev_4D','sfcape_plev_4D','dcape_plev','dcape_plev_4D']
 
 
 lookup_file = AtmPy.__path__.__dict__["_path"][0] + '/psadilookup.dat'
@@ -42,7 +42,7 @@ def mucape_plev_3D(prs_mb,tmp,mixr,hgt,ter,psfc_mb,sfc_t,sfc_mixr,lookup_file=lo
         mixr = mixr[::-1,:,:]
         hgt = hgt[::-1,:,:]
 
-    mucape,mucin,mulcl,mulfc,muel,mupght,mulclt,muelt = AtmPy.cape_3D_plevs.dcapecalc3d(prs_mb,tmp,mixr,hgt,ter,psfc_mb,sfc_t,sfc_mixr,cape_type,ter_follow,lookup_file)
+    mucape,mucin,mulcl,mulfc,muel,mupght,mulclt,muelt = cape_3D_plevs.dcapecalc3d(prs_mb,tmp,mixr,hgt,ter,psfc_mb,sfc_t,sfc_mixr,cape_type,ter_follow,lookup_file)
     return mucape,mucin,mulcl,mulfc,muel,mupght,mulclt,muelt
 
 
