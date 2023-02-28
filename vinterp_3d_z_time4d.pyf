@@ -1,0 +1,20 @@
+!    -*- f90 -*-
+! Note: the context of this file is case sensitive.
+
+python module vinterp_3d_z_time4d ! in 
+    interface  ! in :vinterp_3d_z_time4d
+        subroutine dinterp3dz(v4d,z,loc,v3d,nx,ny,nz,nt) ! in :vinterp_3d_z_time4d:vinterp_3d_z_time4d.f
+            double precision dimension(nt,nz,nx,ny),intent(in) :: v4d
+            double precision dimension(nt,nz,nx,ny),depend(nt,nz,nx,ny),intent(in) :: z
+            double precision,intent(in) :: loc
+            double precision dimension(nt,nx,ny),depend(nt,nx,ny),intent(out) :: v3d
+            integer, optional,check(shape(v4d,2)==nx),depend(v4d) :: nx=shape(v4d,2)
+            integer, optional,check(shape(v4d,3)==ny),depend(v4d) :: ny=shape(v4d,3)
+            integer, optional,check(shape(v4d,1)==nz),depend(v4d) :: nz=shape(v4d,1)
+            integer, optional,check(shape(v4d,0)==nt),depend(v4d) :: nt=shape(v4d,0)
+        end subroutine dinterp3dz
+    end interface 
+end python module vinterp_3d_z_time4d
+
+! This file was auto-generated with f2py (version:1.20.2).
+! See http://cens.ioc.ee/projects/f2py2e/
