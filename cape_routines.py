@@ -5,7 +5,7 @@ import os
 __all__ = ['mlcape_plev','mlcape3km_plev','mlcape3km_plev_4D','sfcape_plev','sfcape3km_plev','sfcape3km_plev_4D','mucape_plev','mucape_plev_4D','mlcape_plev','mlcape_plev_4D','sfcape_plev_4D','dcape_plev','dcape_plev_4D']
 
 
-lookup_file = os.path.abspath(AtmPy.__file__) + 'psadilookup.dat'
+lookup_file = AtmPy.__path__.__dict__["_path"][0] + '/psadilookup.dat'
 
 
 def mucape_plev_3D(prs_mb,tmp,mixr,hgt,ter,psfc_mb,sfc_t,sfc_mixr,lookup_file=lookup_file):
