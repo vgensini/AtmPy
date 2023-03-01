@@ -27,7 +27,7 @@ c                                  appropriately (requires sfc T/Q)
 c     2021-Jan-8  - K. Hoogewind - modified to output EL height and T
 c     2021-Jan-20 - K. Hoogewind - added sb/ml 3km cape, mucape 0 to
 c                                  -20C
-C     2023-Mar-1  - V. Gensini - added support for 4D (time loop)
+c     2021-May-14 - K. Hoogewind - added a loop for time dimension
 c-------------------------------------------------------------------
 c  SUBROUTINE DCAPECALC3D(PRS,TMK,QVP,GHT,TER,SFP,SFTMK,SFQVP,I3DFLAG,
 c     +                       TER_FOLLOW,PSAFILE,CAPE,CIN,MIY,MJX,MKZH)
@@ -93,7 +93,7 @@ C NCLEND
 c Local variables
       INTEGER I,J,K,T,ILCL,IUP,KEL,KK,KLCL,KLEV,KLFC
       INTEGER KMAX,KPAR,KPAR1,KPAR2
-      DOUBLE PRECISION DAVG,ETHMAX,Q,T1,P,E,ETH,ETHSFC,TLCL,ZLCL
+      DOUBLE PRECISION DAVG,ETHMAX,Q,P,T1,E,ETH,ETHSFC,TLCL,ZLCL
       DOUBLE PRECISION CP,EPS,GAMMA,GAMMAMD,RGAS,RGASMD,TLCLC1,TLCLC2,
      +                 TLCLC3,TLCLC4
       DOUBLE PRECISION CPMD,THTECON1,THTECON2,THTECON3
@@ -175,7 +175,7 @@ c
 c
       DO J = 1,MJX
          DO I = 1,MIY
-            DO T = 1,MT
+            DO T=1,MT
 c initialize cape/cin values
               CAPE(T,I,J) = 0.D0
               CIN(T,I,J) = 0.D0
@@ -196,6 +196,7 @@ c     +                      (1.D0+GAMMAMD*QVPPARI))
 c             Most-unstable CAPE in lowest 3 km
               ELSE IF ((I3DFLAG.EQ.0).OR.(I3DFLAG.EQ.6)) THEN
 c      Find parcel with max theta-e in lowest 3 km AGL.
+c                 ETHMAX = -1.D0
                  Q = MAX(SFQVP(T,I,J),1.D-15)
                  E = SFQVP(T,I,J)*SFP(T,I,J)/ (EPS+SFQVP(T,I,J))
                  TLCL = TLCLC1/ (LOG(SFTMK(T,I,J)**TLCLC2/E)-TLCLC3) +
@@ -231,19 +232,65 @@ c                top down approach
                   END DO
                   KPAR1 = KLEV
                   KPAR2 = KLEV
+c                  Q = MAX(QVP(K,I,J),1.D-15)
+c                  TH = TMK(K,I,J)* (1000.D0/P)**
+c     +                         (GAMMA* (1.D0+GAMMAMD*Q))
+c
+c                 Establish average properties of that parcel
+c                 (over depth of approximately davg meters)
+c
+c                  DAVG = 500.D0
+c                  PAVG = DAVG*PRS(KPAR1,I,J)*GRAV/
+c     +                   (RGAS*VIRTUAL(TMK(KPAR1,I,J),QVP(KPAR1,I,J)))
+c                  P2 = MIN(PRS(KPAR1,I,J)+.5D0*PAVG,PRSF(MKZH,I,J))
+c                  P1 = P2 - PAVG
+c                  TOTTHE = 0.D0
+c                  TOTQVP = 0.D0
+c                  TOTPRS = 0.D0
+c                  DO K = MKZH,2,-1
+c                      IF (PRSF(K,I,J).LE.P1) GO TO 35
+c                      IF (PRSF(K-1,I,J).GE.P2) GO TO 34
+c                      P = PRS(K,I,J)
+c                      PUP = PRSF(K,I,J)
+c                      PDN = PRSF(K-1,I,J)
+c                      Q = MAX(QVP(K,I,J),1.D-15)
+c                      TH = TMK(K,I,J)* (1000.D0/P)**
+c     +                         (GAMMA* (1.D0+GAMMAMD*Q))
+c                      PP1 = MAX(P1,PDN)
+c                      PP2 = MIN(P2,PUP)
+c                      IF (PP2.GT.PP1) THEN
+c                          DELTAP = PP2 - PP1
+c                          TOTQVP = TOTQVP + Q*DELTAP
+c                          TOTTHE = TOTTHE + TH*DELTAP
+c                          TOTPRS = TOTPRS + DELTAP
+c                      END IF
    34                 CONTINUE
+c                  END DO
+c If
    35             CONTINUE
                   IF (KLEV.EQ.MKZH) THEN
                       QVPPARI = SFQVP(T,I,J)
                       TMKPARI = SFTMK(T,I,J)
                       PRSPARI = SFP(T,I,J)
+c                      TMKPARI = SFTMK(I,J)*
+c     +                      (PRSPARI/1000.D0)** (GAMMA*
+c     +                      (1.D0+GAMMAMD*QVPPARI))
                       GHTPARI = TER(I,J)
                   ELSE
+c                      TOTQVP = MAX(QVP(KPAR1,I,J),1.D-15)
+c                      TOTTHE = TMK(KPAR1,I,J)*(1000.D0/PRS(KPAR1,I,J))**
+c     +                         (GAMMA* (1.D0+GAMMAMD*TOTQVP))
+
                       QVPPARI = QVP(T,KPAR1,I,J) 
+c/TOTPRS
                       TMKPARI = TMK(T,KPAR1,I,J)
+c                      TMKPARI = (TMKPARI)*
+c     +                      (PRS(KPAR1,I,J)/1000.D0)** (GAMMA*
+c     +                      (1.D0+GAMMAMD*QVPPARI))
                       PRSPARI = PRS(T,KPAR1,I,J)
                       GHTPARI = GHT(T,KPAR1,I,J)
                   END IF
+c              ELSE
 c
               ELSE IF (I3DFLAG.EQ.2) THEN
 ccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
@@ -286,6 +333,7 @@ c
      +                      (PAVG/1000.D0)** (GAMMA*
      +                      (1.D0+GAMMAMD*QVPPARI))
 
+c             END IF
 
 ccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
 ccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
@@ -306,6 +354,8 @@ c                Find avg parcel properties in lowest 100mb.
                  DO K = MKZH,1,-1
 c                top down approach
                       IF ((PRS(K,T,I,J).GE.((SFP(T,I,J)-100.D0)))) THEN
+c                      IF ((GHT(K,I,J)-TER(I,J).LE.500.D0)
+c     +                .AND.(GHT(K,I,J)-TER(I,J).GE.0.D0)) THEN
                           P = PRS(K,T,I,J)
                           TOTPRS = TOTPRS + P
                           Q = MAX(QVP(K,T,I,J),1.D-15)
@@ -314,19 +364,23 @@ c                top down approach
                           KLEV = KLEV + K
                           TOTQVP = TOTQVP + Q
                           TOTTHE = TOTTHE + TH
+c                          TOTTHE = TOTTHE + TMK(K,I,J)
                           KK = KK + 1
                       END IF
                   END DO
                   SFTH = SFTMK(T,I,J)* (1000.D0/SFP(T,I,J))**
      +                         (GAMMA* (1.D0+GAMMAMD*SFQVP(T,I,J)))
+c                  SFTH = SFTMK(I,J)
                   KPAR1 = MKZH
                   KPAR2 = MKZH
 c                Changed PAVG to be surface pressure
                   PAVG = SFP(T,I,J)
+c                  PAVG = (TOTPRS+SFP(I,J))/(KK+1)
                   PRSPARI = SFP(T,I,J)
                   GHTPARI = TER(I,J)
 c
                   QVPPARI = (TOTQVP+SFQVP(T,I,J))/(KK+1)
+c                  TMKPARI = ((TOTTHE+SFTH)/(KK+1))
                   TMKPARI = ((TOTTHE+SFTH)/(KK+1))*
      +                      (PAVG/1000.D0)** (GAMMA*
      +                      (1.D0+GAMMAMD*QVPPARI))
@@ -336,7 +390,7 @@ c
 ccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
 ccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
 ccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc
-              PGHT(T,I,J) = GHTPARI - TER(I,J)
+              PGHT(T,I,J) = GHTPARI
               DO KPAR = KPAR1,KPAR2
 c
 c   Calculate temperature and moisture properties of parcel
@@ -368,6 +422,11 @@ c
                           KLCL = 1
                   END IF
                   DO K = KPAR,1,-1
+c                  DO K = KPAR,0,-1
+c                   IF (K.EQ.KPAR) THEN
+c                       print *,'pres lev',PRS(K,I,J),'sfc',SFP(I,J)
+c                       print *,'cape type',I3DFLAG
+c                   END IF
                    IF (PRS(K,T,I,J).LE.SFP(T,I,J)) THEN
 C  for arrays that go bottom to top
    33                 KK = KK + 1
@@ -410,6 +469,7 @@ c
                       END IF
 C  buoyancy
                       BUOY(KK) = GRAV* (TVLIFT-TVENV)/TVENV
+c                      print *,KK,'buoy (tvlift-tvenv):',BUOY(KK)
                       ZREL(KK) = GHTLIFT - GHTPARI
                       PTMP(KK) = TMKENV
                       IF ((KK.GT.1).AND.
@@ -456,9 +516,11 @@ c
                   BENACCUM2(1) = 0.0D0
                   PAREA(1) = 0.0D0
                   NAREA(1) = 0.0D0
+c                  BENAMIN = 9D9
                   BENAMIN = 0.0D0
                   BENAMIN1 = 0.0D0
                   DO K = 2,KMAX
+c                  DO K = 2, KEL
                       IF (I3DFLAG.EQ.1) THEN
                           DZ = ZREL(K) - ZREL(K-1)
                           BENACCUM(K) = BENACCUM(K-1) +
@@ -547,6 +609,7 @@ c   inhibition (CIN).
 c
 c   First get the LFC according to the above definition.
 c
+c                  BENAMIN1 = 9D9
                   BENAMIN = 9D9
                   KLFC = KMAX
                   DO K = KLCL,KEL 
@@ -559,15 +622,44 @@ c
 c
 c   Now we can assign values to cape and cin
 c
+c                  CAPE(I,J) = MAX(BENACCUM(KEL)-BENAMIN,0.0D0)
                    CAPE(T,I,J) = MAX(PAREA(KEL),0.0D0)
+
+c                      print *,'narea:',NAREA
+c                      CIN(I,J) = MAX(BENACCUM(KLFC),0.0D0)
+c                      CIN(I,J) = MAX(-NAREA(KLFC),0.1D0)
+c                      CIN(I,J) = MAX(-BENAMIN,0.0D0)
+c                  BENAMIN = 9D9
+c                  DO K = 1,KLFC
+c                    IF (K.LT.KEL) THEN
+c                       BENAMIN = MIN(BENAMIN,BENACCUM(K))
+c                    END IF
+c                  END DO
+c                  print * ,I,J, BENAMIN
+c                  IF (CAPE(I,J).EQ.0.0D0) THEN
+c                      CIN(I,J) = 0.0D0
+c                  ELSE
+c                   CIN(I,J) = MAX(-BENACCUM(KLFC),0.0D0)
+c                      CIN(I,J) = MAX(-BENAMIN,0.0D0)
                    CIN(T,I,J) = MAX(ABS(NAREA(KEL)),0.0D0)
+c                   CIN(I,J) = MAX(ABS(NAREA(KEL)-
+c     +                     MAX(NAREA(KEL),0.D0)),0.0D0)
                    IF (CAPE(T,I,J).EQ.0.0D0) CIN(T,I,J) = 0.0D0
+c                      CIN(I,J) = 0.0D0
+c                      CIN(I,J) = BENAMIN
+c                  END IF
+c                  END DO
+c                  CIN(I,J) = MAX(-BENAMIN,0.0D0)
+c   CIN to -0.1 (see note about missing values in V6.1.0) in 
+c   that case.
 c
 c   In V6.1.0 of NCL, we added a _FillValue attribute to the return
 c   value of this function. At that time we decided to change -0.1 
 c   to a more appropriate missing value, which is passed into this 
 c   routine as CMSG.
 c
+C                 IF (CAPE(I,J,KPAR).LT.100.D0) CIN(I,J,KPAR) = -0.1D0
+c                  IF (CAPE(I,J).LT.100.D0) CIN(I,J) = CMSG
   102             CONTINUE
 c
               END DO
@@ -592,8 +684,8 @@ C  meters AGL
               IF (LFC(T,I,J).LT.0.D0) LFC(T,I,J) = 0.D0
               IF (EL(T,I,J).LT.0.D0) EL(T,I,J) = 0.D0
 c
-            END DO          
-         END DO
+          END DO
+        END DO
       END DO
 c
       RETURN
