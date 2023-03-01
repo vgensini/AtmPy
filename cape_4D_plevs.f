@@ -27,7 +27,7 @@ c                                  appropriately (requires sfc T/Q)
 c     2021-Jan-8  - K. Hoogewind - modified to output EL height and T
 c     2021-Jan-20 - K. Hoogewind - added sb/ml 3km cape, mucape 0 to
 c                                  -20C
-C     2023-Mar-1  - V. Gensini - added support for 4D (time loop)
+c     2023-Mar-1  - V. Gensini - added support for 4D (time loop)
 c-------------------------------------------------------------------
 c  SUBROUTINE DCAPECALC3D(PRS,TMK,QVP,GHT,TER,SFP,SFTMK,SFQVP,I3DFLAG,
 c     +                       TER_FOLLOW,PSAFILE,CAPE,CIN,MIY,MJX,MKZH)
@@ -239,10 +239,10 @@ c                top down approach
                       PRSPARI = SFP(T,I,J)
                       GHTPARI = TER(I,J)
                   ELSE
-                      QVPPARI = QVP(T,KPAR1,I,J) 
-                      TMKPARI = TMK(T,KPAR1,I,J)
-                      PRSPARI = PRS(T,KPAR1,I,J)
-                      GHTPARI = GHT(T,KPAR1,I,J)
+                      QVPPARI = QVP(KPAR1,T,I,J) 
+                      TMKPARI = TMK(KPAR1,T,I,J)
+                      PRSPARI = PRS(KPAR1,T,I,J)
+                      GHTPARI = GHT(KPAR1,T,I,J)
                   END IF
 c
               ELSE IF (I3DFLAG.EQ.2) THEN
