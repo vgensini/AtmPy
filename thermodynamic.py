@@ -6,7 +6,7 @@ import numpy
 __all__ = ['frzlvl','cape_plev_3D','cape_plev_4D']
 
 
-lookup_file = pysvr.__path__.__dict__["_path"][0] + '/psadilookup.dat'
+lookup_file = pysvr.__path__[0]+ '/psadilookup.dat'
 ter_follow = 0 # Pressure level data for all functions
 
 #freezing level
