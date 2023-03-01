@@ -1,13 +1,13 @@
-import AtmPy
-from AtmPy import cape_3D_plevs
-from AtmPy import cape_4D_plevs
+import pysvr
+from pysvr import cape_3D_plevs
+from pysvr import cape_4D_plevs
 import numpy as np
 import os
 
 __all__ = ['cape_plev_3D','cape_plev_4D']
 
 
-lookup_file = AtmPy.__path__.__dict__["_path"][0] + '/psadilookup.dat'
+lookup_file = pysvr.__path__.__dict__["_path"][0] + '/psadilookup.dat'
 ter_follow = 0 # Pressure level data for all functions
 
 def cape_plev_3D(prs_mb,tmp,mixr,hgt,ter,psfc_mb,sfc_t,sfc_mixr,parcel):
