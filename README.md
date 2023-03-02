@@ -25,13 +25,14 @@ Contributions are always welcome!
 ```python
 import pysvr
 
-#Calculate 100-hPa mixed layer CAPE
+#Calculate CAPE from 4-D rank array (time, level, lat, lon)
+# Vertical coordinate is pressure
 pysvr.thermodynamic.cape_plev_4D()
 
-#Calculate the violent tornado parameter
+#Calculate violent tornado parameter
 pysvr.indicies.vtp()
 
-#Calculate the bulk wind shear
+#Calculate bulk wind shear
 pysvr.kinematic.bulk_wind_shear()
                                                                 
 ```
