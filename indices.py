@@ -1,5 +1,5 @@
 
-__all__ = ['stp','scp','ship']
+__all__ = ['stp','vtp','scp','ship']
 
 #sig tornado parameter
 def stp(cape,s06,lcl,cin,srh):
@@ -17,6 +17,26 @@ def stp(cape,s06,lcl,cin,srh):
     stp = term1*term2*term3*term4*term5
     stp[stp<0.] = 0.0
     return stp
+
+#violent tornado parameter
+def vtp(cape,s06,lcl,cin,srh,cape03,lr03):
+    term1 = cape/1500.
+    term2 = (2000.-lcl)/1000.
+    term3 = srh/150.
+    term4 = s06/20.
+    term5 = (200+cin)/150.
+    term6 = cape03/50.
+    term7 = lr03 / 6.5
+    term2[lcl<1000.] = 1.0
+    term2[lcl>2000.] = 0.0
+    term5[cin>-50.] = 1.0
+    term5[cin<-200.] = 0.0
+    term4[s06>30.] = 1.5
+    term4[s06<12.5] = 0.0
+    term7[cape03>100.] = 2.0
+    vtp = term1*term2*term3*term4*term5*term6*term7
+    vtp[vtp<0.] = 0.0
+    return vtp
 
 #supercell composite parameter
 def scp(cape,srh,bwd,cin):
